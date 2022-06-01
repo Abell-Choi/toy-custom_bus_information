@@ -9,7 +9,7 @@ class BusParser:
             return self._resultType('err', 'no serviceKey')
         self.strServiceKey = strServiceKey
         self.strAppDataPath = strAppDataPath
-        self.objCityCode = self.getCityCodeFile()
+        self.lstCityCode = self.getCityCodeFile()['value']
 
         pass
 
@@ -20,14 +20,24 @@ class BusParser:
             'type' : str(type(objValue))
         }
 
+    def _checkCityCode(self, nCityCode):
+        for i in self.lstCityCode:
+            if i['citycode'] == nCityCode:
+                res = True
+                return self._resultType('ok', i['cityname'])
+                
+        return self._resultType('err', 'no Match code')
+
     def _getAPIData(self, strUrl, objParams ={}):
         if objParams == {}:
             objParams = {'serviceKey' : self.strServiceKey, '_type' : 'json'}
         
         if not 'serviceKey' in objParams:
+            print("can't find servicekey in params")
             objParams['serviceKey'] = self.strServiceKey
         
         if not '_type' in objParams:
+            print("can't find _type in params")
             objParams['_type'] = 'json'
 
         f = requests.get(strUrl, objParams)
@@ -41,7 +51,7 @@ class BusParser:
             return self._resultType('err', 'JSON PARSE ERR -> {0}\n{1}'.format(e, strApiData))
         
         if objReqData['response']['body']['items'] == '':
-            return self._resultType('err', 'no Data in Items')
+            return self._resultType('err', 'no Data in Items -> {0}'.format(objReqData))
         return self._resultType('ok', objReqData['response']['body']['items'])
 
     def getCityCodeFile(self):
@@ -69,4 +79,23 @@ class BusParser:
         f.write(json.dumps(objApiReq['value']['item'], indent=2, ensure_ascii= False))
         return self._resultType('ok', 'citycode updated')
 
-obj = BusParser(strServiceKey='CUVA5IJchn3HKUbkeZvoDyJOnPeb1McJdicq6Ho830JRN9SpE8BpjadSGBQ/Dr6LhXgBiJLRVG2calIzDYLRqA==')
+    def getRouteInfo(self, nCityCode:int=0, nBusNum:int=0) -> dict:
+        if nCityCode == 0:
+            return self._resultType('err', 'need city code')
+        if self._checkCityCode(nCityCode)['res'] == 'err':
+            return self._resultType('err', 'no match citycode')
+        
+        if nBusNum == 0:
+            return self._resultType('err', 'need bus number')
+        strUrl = 'http://apis.data.go.kr/1613000/BusRouteInfoInqireService/getRouteNoList'
+        objParam = {
+            '_type' : 'json',
+            'cityCode' : str(nCityCode),
+            'routeNo' : str(nBusNum),
+            'numOfRows' : str(1000)
+        }
+
+        objRes = self._getAPIData(strUrl, objParam)
+        if objRes['res'] == 'err' : return objRes
+
+        return self._resultType('ok', objRes['value']['item'])
