@@ -4,7 +4,7 @@ import json
 import os
 
 class BusParser:
-    def __init__ (self, strAppDataPath='./AppData/', strServiceKey = ''):
+    def __init__ (self, strAppDataPath:str='./AppData/', strServiceKey:str = ''):
         if strServiceKey == '':
             return self._resultType('err', 'no serviceKey')
         self.strServiceKey = strServiceKey
@@ -13,14 +13,14 @@ class BusParser:
 
         pass
 
-    def _resultType(self, strRes, objValue):
+    def _resultType(self, strRes:str, objValue:dict):
         return {
             'res' : strRes,
             'value' : objValue,
             'type' : str(type(objValue))
         }
 
-    def _checkCityCode(self, nCityCode):
+    def _checkCityCode(self, nCityCode:int):
         for i in self.lstCityCode:
             if i['citycode'] == nCityCode:
                 res = True
@@ -28,7 +28,7 @@ class BusParser:
                 
         return self._resultType('err', 'no Match code')
 
-    def _getAPIData(self, strUrl, objParams ={}):
+    def _getAPIData(self, strUrl:str, objParams:dict={}):
         if objParams == {}:
             objParams = {'serviceKey' : self.strServiceKey, '_type' : 'json'}
         
@@ -114,4 +114,11 @@ class BusParser:
             'routeId' : strRouteId
         }
         return self._getAPIData(strUrl, objParam)
+
+    # 정류소별 버스 도착 예정 리스트 (WIP)
+    def getBusArrivalList(self, nCityCode:int, strNodeId:str):
+        return self._resultType('err', 'wip')
+    # 정류소별 특정 버스 도착 예정 리스트 (WIP)
+    def getBusArrival(self, nCityCode:int, strRouteId:str, strNodeId:str):
+        return self._resultType('err', 'wip')
 
