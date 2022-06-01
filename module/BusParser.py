@@ -99,3 +99,18 @@ class BusParser:
         if objRes['res'] == 'err' : return objRes
 
         return self._resultType('ok', objRes['value']['item'])
+    
+    def getBusStateInfo(self, nCityCode:int=0, strRouteId:str=''):
+        if nCityCode == 0: return self._resultType('err', 'need nCityCode')
+        if strRouteId == '': return self._resultType('err', 'need strRouteId')
+        if self._checkCityCode(nCityCode)['res'] == 'err':
+            return self._checkCityCode(nCityCode)
+        
+        strUrl = 'http://apis.data.go.kr/1613000/BusLcInfoInqireService/getRouteAcctoBusLcList'
+        objParam = {
+            '_type' : 'json',
+            'numOfRows' : str(1000),
+            'cityCode' : str(nCityCode),
+            'routeId' : strRouteId
+        }
+        return self._getAPIData(strUrl, objParam)
