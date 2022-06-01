@@ -116,9 +116,32 @@ class BusParser:
         return self._getAPIData(strUrl, objParam)
 
     # 정류소별 버스 도착 예정 리스트 (WIP)
-    def getBusArrivalList(self, nCityCode:int, strNodeId:str):
-        return self._resultType('err', 'wip')
+    def getBusArrivalList(self, nCityCode:int = 0, strNodeId:str = ''):
+        if nCityCode == 0: return self._resultType('err', 'need nCityCode')
+        if strNodeId == '' : return self._resultType('err', 'need strNodeId')
+        if self._checkCityCode(nCityCode)['res'] == 'err':
+            return self._checkCityCode(nCityCode)
+        
+        strUrl = 'http://apis.data.go.kr/1613000/ArvlInfoInqireService/getSttnAcctoArvlPrearngeInfoList'
+        objParam = {
+            '_type' : 'json',
+            'numOfRows' : str(100),
+            'nodeId' : strNodeId
+        }
+
+        return self._getAPIData(strUrl, objParam)
     # 정류소별 특정 버스 도착 예정 리스트 (WIP)
     def getBusArrival(self, nCityCode:int, strRouteId:str, strNodeId:str):
-        return self._resultType('err', 'wip')
+        if nCityCode == 0: return self._resultType('err', 'need nCityCode')
+        if strNodeId == '' : return self._resultType("err", 'need strNodeId')
+        if strRouteId == '' : return self._resultType('err', 'need strRouteId')
 
+        strUrl = 'http://apis.data.go.kr/1613000/ArvlInfoInqireService/getSttnAcctoSpcifyRouteBusArvlPrearngeInfoList'
+        objParam = {
+            '_type' : 'json',
+            'cityCode' : str(nCityCode),
+            'nodeId' : strNodeId,
+            'routeId' : strRouteId
+        }
+        
+        return self._getAPIData(strUrl, objParam)
